@@ -18,8 +18,9 @@ def getImages():
     
     
     for img in soup.findAll("img", src=True):
-        if img["src"] not in images:
-            images.append(urlparse.urljoin(url, img["src"]))
+        temp = urlparse.urljoin(url, img["src"])
+        if temp not in images:
+            images.append(temp)
             
     #print images
     return images
