@@ -5,7 +5,7 @@ Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
 
-from app import app
+from app import app, db, login_manager
 from flask import render_template, request, redirect, url_for, jsonify, make_response,session
 from flask_login import login_user, logout_user, current_user, login_required
 from bs4 import BeautifulSoup
@@ -80,7 +80,7 @@ def thumbnails():
 
     if request.method == "GET":
 
-        res = {"error": "null", "message": "success", "thumbnails": getImg(url)}
+        res = {"error": "null", "message": "success", "thumbnails": getImages(url)}
 
         response = make_response(jsonify(res))
         response.headers['Content-Type'] = 'application/json'

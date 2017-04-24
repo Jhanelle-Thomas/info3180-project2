@@ -2,8 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import urlparse
 
-def getImages():
-    url = "https://www.walmart.com/ip/54649026"
+def getImages(url):
+    #url = "https://www.walmart.com/ip/54649026"
     result = requests.get(url)
     soup = BeautifulSoup(result.text, "html.parser")
     images = []
