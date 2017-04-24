@@ -1,3 +1,10 @@
 Flask
 requests
 beautifulsoup4
+Flask-WTF
+Flask-SQLAlchemy
+Flask-Migrate
+psycopg2
+Werkzeug
+Flask-Login
+gunicorn
