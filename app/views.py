@@ -8,6 +8,7 @@ This file creates your application.
 from app import app, db, login_manager
 from flask import render_template, request, redirect, url_for, jsonify, make_response,session
 from flask_login import login_user, logout_user, current_user, login_required
+from flask_jwt import JWT, jwt_required, current_identity
 from bs4 import BeautifulSoup
 import requests
 import urlparse
@@ -117,6 +118,21 @@ def login():
         else:
             flash('Username or Password is incorrect.', 'danger')
             return jsonify({"Success":"False"})
+            
+@app.route("/login", methods=["GET"])
+def loginpage():
+    form = LoginForm()
+    return render_template("login.html", form=form)
+    
+@app.route("/register", methods=["GET"])
+def registerpage():
+    form = SignUpForm()
+    return render_template("register.html",form=form)
+    
+@app.route("/add-wish", methods=["GET"])
+def addwish():
+    form = WishListForm()
+    return render_template("addwish.html",form=form)
 
 @app.route("/logout")
 @login_required

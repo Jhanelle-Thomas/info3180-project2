@@ -8,3 +8,4 @@ psycopg2
 Werkzeug
 Flask-Login
 gunicorn
+flask_jwt
