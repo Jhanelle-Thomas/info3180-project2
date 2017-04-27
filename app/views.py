@@ -26,7 +26,9 @@ def home():
     """Render website's home page."""
     return render_template('home.html')
     
-    
+
+## API Routes
+
 @app.route("/api/users/register", methods=["POST"])
 def register():
     form = SignUpForm()
@@ -110,6 +112,7 @@ def login():
 
         if user is not None:
             login_user(user)
+            session["logged_in"] = True
             session["userid"] = user.userid
             flash('Logged in successfully.', 'success')
             return jsonify({"Success":"True"})
@@ -118,6 +121,8 @@ def login():
         else:
             flash('Username or Password is incorrect.', 'danger')
             return jsonify({"Success":"False"})
+
+## Normal Routes
             
 @app.route("/login", methods=["GET"])
 def loginpage():
@@ -139,8 +144,7 @@ def addwish():
 def logout():
     logout_user()
     flash('You have been logged out.', 'danger')
-    return jsonify({"Success":"True"})
-    #return redirect(url_for('home'))
+    return redirect(url_for('home'))
 
 @login_manager.user_loader
 def load_user(id):

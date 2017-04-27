@@ -1,7 +1,16 @@
 {% extends "base.html" %}
 
 {% block main %}
-<h1 class="page-header">Lab 7 Starter Code</h1>
-<p class="lead">Use this starter template for your Flask apps as a way to quickly start any new project.<br>
-All you get are these files and mostly barebones HTML/CSS files.</p>
+<h1 class="page-header">Welcome To WishList (Like Craigslist but you can't buy anything)</h1>
+
+{% if not session.logged_in %}
+
+<p class="lead">Please Login to Continue.</p>
+
+{% else %}
+
+<p class="lead">This is your wishlist: </p>
+
+{% endif %}
+
 {% endblock %}
