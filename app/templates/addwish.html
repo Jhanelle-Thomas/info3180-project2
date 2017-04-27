@@ -29,8 +29,8 @@
     </form>
     
     {% raw %}
-    <form>
-        <div class="form-group" ng-controller="imageCtrl">
+    <form ng-controller="imageCtrl">
+        <div class="form-group">
             <label for="im" >URL for Thumbnails</label> 
             <input name="im" class="form-control" type="text" placeholder="URL for images" ng-model="url">
             <button type="submit" ng-click="getImages()" class="btn btn-primary btn-block">Get Thumbnails</button>
