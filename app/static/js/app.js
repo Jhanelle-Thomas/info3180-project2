@@ -20,6 +20,27 @@ app.controller("imageCtrl", function($scope, $http){
     };
 });
 
+app.controller("regCtrl", function($scope, $http){
+    
+    $scope.reg = function(){
+        var fname = document.getElementById("first_name").value;
+        var lname = document.getElementById("last_name").value;
+        var uname = document.getElementById("username").value;
+        var passw = document.getElementById("password").value;
+        
+        var data = {first_name: fname, last_name: lname, username: uname, password: passw};
+    
+        $http.post('/api/users/register', JSON.stringify(data)).then(function(res){
+            if (res["status"] == 200){
+                alert("200 OK");
+            }
+            else{
+                alert("404 Not OK ");
+            }
+        });
+    };
+});
+
 function giveThumbail(img){
         var loc = document.getElementById("thumbnail");
         loc.value = img.src;

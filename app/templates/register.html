@@ -3,9 +3,9 @@
 {% block title %} SignUp {% endblock %}
 
 {% block main %}
-<div class="login-form center-block">
+<div class="login-form center-block" ng-app="wishListApp" ng-controller="regCtrl">
     <h2>Sign Up</h2>
-    <form action="{{ url_for('registerpage') }}" method="POST">
+    <form name="rForm">
         {{ form.csrf_token }}
         
         <div class="form-group">
@@ -28,7 +28,12 @@
             {{ form.password(class='form-control', placeholder="Password") }}
         </div>
         
-        <button type="submit" name="submit" class="btn btn-primary btn-block">SignUp</button>
+        <button type="submit" name="submit" class="btn btn-primary btn-block" ng-click="reg()">SignUp</button>
     </form>
 </div>
 {% endblock %}
+
+{% block js %} 
+<script src="/static/js/angular.min.js"></script>
+<script src="/static/js/app.js"></script>
+{% endblock%}

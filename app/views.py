@@ -31,22 +31,20 @@ def home():
 
 @app.route("/api/users/register", methods=["POST"])
 def register():
-    form = SignUpForm()
 
-    if form.validate_on_submit():
-        first_name = form.first_name.data
-        last_name = form.last_name.data
-        username = form.username.data
-        password = form.password.data
+    first_name = request.get_json()["first_name"]
+    last_name = request.get_json()["last_name"]
+    username = request.get_json()["username"]
+    password = request.get_json()["password"]
 
-        uid = genId(first_name,last_name,random.randint(1,100))
+    uid = genId(first_name,last_name,random.randint(1,100))
 
-        new_user = UserProfile(userid=uid, username=username, first_name=first_name, last_name=last_name, password=password)
+    new_user = UserProfile(userid=uid, username=username, first_name=first_name, last_name=last_name, password=password)
 
-        db.session.add(new_user)
-        db.session.commit()
+    db.session.add(new_user)
+    db.session.commit()
 
-        return jsonify({"Success":"True"})
+    return jsonify({"Success":"True"})
 
 @app.route("/api/users/<int:userid>/wishlist", methods=["GET","POST"])
 def wishlist(userid):
@@ -56,23 +54,21 @@ def wishlist(userid):
         return jsonify(wishlist)
 
     elif request.method == "POST":
-        form = WishListForm()
+        
+        userid = sesson["userid"]
+        title = request.get_json()["title"]
+        description = request.get_json()["description"]
+        website = request.get_json()["website"]
+        thumbnail = request.get_json()["thumbnail"]
 
-        if form.validate_on_submit():
-            userid = sesson["userid"]
-            title = form.title.data
-            description = form.description.data
-            website = form.description.data
-            thumbnail = form.thumbnail.data
+        itemid = genId(title,website,random.randint(1,100))
 
-            itemid = genId(title,website,random.randint(1,100))
+        witem = WishListItem(itemid=itemid,userid=userid,title=title,description=description,website=website,thumbnail=thumbnail)
 
-            witem = WishListItem(itemid=itemid,userid=userid,title=title,description=description,website=website,thumbnail=thumbnail)
+        db.session.add(witem)
+        db.session.commit()
 
-            db.session.add(witem)
-            db.session.commit()
-
-            return jsonify({"Success":"True"})
+        return jsonify({"Success":"True"})
 
 @app.route('/api/thumbnails', methods=["GET"])
 def thumbnails():
@@ -82,13 +78,8 @@ def thumbnails():
     url = request.args.get("url")
 
     if request.method == "GET":
-
         res = {"error": "null", "message": "success", "thumbnails": getImages(url)}
-
-        response = make_response(jsonify(res))
-        response.headers['Content-Type'] = 'application/json'
-
-        return response
+        return jsonify(res)
 
 @app.route("/api/users/<int:userid>/wishlist/<int:itemid>", methods=["DELETE"])
 def deleteitem(userid,itemid):
@@ -102,25 +93,21 @@ def deleteitem(userid,itemid):
 @app.route("/api/users/login", methods=["POST"])
 def login():
 
-    form = LoginForm()
+    uname = request.get_json()["username"]
+    pword = request.get_json()["password"]
 
-    if form.validate_on_submit():
-        uname = form.username.data
-        pword = form.password.data
+    user = UserProfile.query.filter_by(username=uname, password=pword).first()
 
-        user = UserProfile.query.filter_by(username=uname, password=pword).first()
+    if user is not None:
+        login_user(user)
+        session["logged_in"] = True
+        session["userid"] = user.userid
+        #flash('Logged in successfully.', 'success')
+        return jsonify({"Success":"True"})
 
-        if user is not None:
-            login_user(user)
-            session["logged_in"] = True
-            session["userid"] = user.userid
-            flash('Logged in successfully.', 'success')
-            return jsonify({"Success":"True"})
-            #return redirect(url_for("secure_page")) # they should be redirected to a secure-page route instead
-
-        else:
-            flash('Username or Password is incorrect.', 'danger')
-            return jsonify({"Success":"False"})
+    else:
+        #flash('Username or Password is incorrect.', 'danger')
+        return jsonify({"Success":"False"})
 
 ## Normal Routes
             
