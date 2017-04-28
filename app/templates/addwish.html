@@ -5,7 +5,7 @@
 {% block main %}
 <div class="login-form center-block" ng-app="wishListApp">
     <h2>Add Wish Item</h2>
-    <form action="{{ url_for('registerpage') }}" method="POST">
+    <form ng-controller="addCtrl">
         {{ form.csrf_token }}
         <div class="form-group">
             {{ form.title.label }}
@@ -25,14 +25,15 @@
             {{ form.thumbnail(class='form-control', placeholder="Thumbnail") }}
         </div>
         
-        <button type="submit" name="submit" class="btn btn-primary btn-block">Submit</button>
+        <button type="submit" name="submit" class="btn btn-primary btn-block" ng-click="addWish({{ session.userid }})">Submit</button>
     </form>
-    
+    <br/>
     {% raw %}
     <form ng-controller="imageCtrl">
         <div class="form-group">
             <label for="im" >URL for Thumbnails</label> 
             <input name="im" class="form-control" type="text" placeholder="URL for images" ng-model="url">
+            <br/>
             <button type="submit" ng-click="getImages()" class="btn btn-primary btn-block">Get Thumbnails</button>
         </div>
         <div id="pics">

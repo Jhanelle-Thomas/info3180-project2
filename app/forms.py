@@ -5,13 +5,14 @@ from wtforms.validators import InputRequired
 class WishListForm(FlaskForm):
     title = StringField('Title', validators=[InputRequired()])
     description = StringField('Description', validators=[InputRequired()])
-    website = StringField('Website', validators=[InputRequired()])
+    website = StringField('Website URL', validators=[InputRequired()])
     thumbnail = StringField('Thumbnail', validators=[InputRequired()])
 
 class SignUpForm(FlaskForm):
     first_name = StringField('First Name', validators=[InputRequired()])
     last_name = StringField('Last Name', validators=[InputRequired()])
     username = StringField('Username', validators=[InputRequired()])
+    email = StringField('Email Address', validators=[InputRequired()])
     password = PasswordField('Password', validators=[InputRequired()])
 
 class LoginForm(FlaskForm):

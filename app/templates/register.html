@@ -24,6 +24,11 @@
         </div>
         
         <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class='form-control', placeholder="Email Address") }}
+        </div>
+        
+        <div class="form-group">
             {{ form.password.label }}
             {{ form.password(class='form-control', placeholder="Password") }}
         </div>

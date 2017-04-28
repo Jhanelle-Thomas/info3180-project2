@@ -5,7 +5,7 @@ class WishListItem(db.Model):
     userid = db.Column(db.Integer)
     title = db.Column(db.String(80))
     description = db.Column(db.String(80))
-    website = db.Column(db.String(80))
+    website = db.Column(db.String(255))
     thumbnail = db.Column(db.String(80))
 
 class UserProfile(db.Model):
@@ -13,6 +13,7 @@ class UserProfile(db.Model):
     first_name = db.Column(db.String(80))
     last_name = db.Column(db.String(80))
     username = db.Column(db.String(80))
+    email = db.Column(db.String(80))
     password = db.Column(db.String(80))
 
     def is_authenticated(self):
@@ -26,9 +27,9 @@ class UserProfile(db.Model):
 
     def get_id(self):
         try:
-            return unicode(self.id)
+            return unicode(self.userid)
         except NameError:
-            return str(self.id)
+            return str(self.userid)
 
     def __repr__(self):
         return '<User %r>' % (self.username)

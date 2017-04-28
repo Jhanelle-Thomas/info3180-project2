@@ -6,16 +6,52 @@ This file creates your application.
 """
 
 from app import app, db, login_manager
-from flask import render_template, request, redirect, url_for, jsonify, make_response,session
+from flask import render_template, request, redirect, url_for, jsonify, make_response,session, flash, g
 from flask_login import login_user, logout_user, current_user, login_required
-from flask_jwt import JWT, jwt_required, current_identity
 from bs4 import BeautifulSoup
+from functools import wraps
+import jwt
+import base64
+import os
+import smtplib
 import requests
 import urlparse
 import random
 from forms import *
 from models import *
 from image_getter import *
+
+    
+# JWT @requires_auth decorator
+def requires_auth(f):
+  @wraps(f)
+  def decorated(*args, **kwargs):
+    auth = request.headers.get('Authorization', None)
+    if not auth:
+      return jsonify({'code': 'authorization_header_missing', 'description': 'Authorization header is expected'}), 401
+
+    parts = auth.split()
+
+    if parts[0].lower() != 'bearer':
+      return jsonify({'code': 'invalid_header', 'description': 'Authorization header must start with Bearer'}), 401
+    elif len(parts) == 1:
+      return jsonify({'code': 'invalid_header', 'description': 'Token not found'}), 401
+    elif len(parts) > 2:
+      return jsonify({'code': 'invalid_header', 'description': 'Authorization header must be Bearer + \s + token'}), 401
+
+    token = parts[1]
+    try:
+         payload = jwt.decode(token, app.config['SECRET_KEY'])
+
+    except jwt.ExpiredSignature:
+        return jsonify({'code': 'token_expired', 'description': 'token is expired'}), 401
+    except jwt.DecodeError:
+        return jsonify({'code': 'token_invalid_signature', 'description': 'Token signature is invalid'}), 401
+
+    g.current_user = user = payload
+    return f(*args, **kwargs)
+
+  return decorated
 
 ###
 # Routing for your application.
@@ -47,15 +83,24 @@ def register():
     return jsonify({"Success":"True"})
 
 @app.route("/api/users/<int:userid>/wishlist", methods=["GET","POST"])
+@requires_auth
 def wishlist(userid):
 
     if request.method == "GET":
         wishlist = WishListItem.query.filter_by(userid=userid).all()
-        return jsonify(wishlist)
+        
+        wishes = []
+        
+        for wish in wishlist:
+            wish = wish.__dict__
+            del wish['_sa_instance_state']
+            wishes.append(wish)
+            
+        return jsonify(wishes)
 
     elif request.method == "POST":
         
-        userid = sesson["userid"]
+        userid = session["userid"]
         title = request.get_json()["title"]
         description = request.get_json()["description"]
         website = request.get_json()["website"]
@@ -71,6 +116,7 @@ def wishlist(userid):
         return jsonify({"Success":"True"})
 
 @app.route('/api/thumbnails', methods=["GET"])
+@requires_auth
 def thumbnails():
     """API for thumbnails"""
 
@@ -82,6 +128,7 @@ def thumbnails():
         return jsonify(res)
 
 @app.route("/api/users/<int:userid>/wishlist/<int:itemid>", methods=["DELETE"])
+@requires_auth
 def deleteitem(userid,itemid):
     witem = WishListItem.query.filter_by(userid=userid,itemid=itemid).first()
 
@@ -102,12 +149,10 @@ def login():
         login_user(user)
         session["logged_in"] = True
         session["userid"] = user.userid
-        #flash('Logged in successfully.', 'success')
-        return jsonify({"Success":"True"})
+        payload = {'sub': user.userid , 'name': user.first_name + " " + user.last_name}
+        token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
 
-    else:
-        #flash('Username or Password is incorrect.', 'danger')
-        return jsonify({"Success":"False"})
+        return jsonify(error=None, data={'token': token}, message={"Success":"True"})
 
 ## Normal Routes
             
@@ -126,13 +171,40 @@ def addwish():
     form = WishListForm()
     return render_template("addwish.html",form=form)
 
-@app.route("/logout")
-@login_required
+@app.route("/logout", methods=["GET"])
 def logout():
+    session.pop('userid', None)
+    session.pop('logged_in', None)
     logout_user()
     flash('You have been logged out.', 'danger')
     return redirect(url_for('home'))
 
+@app.route("/share/<int:userid>", methods=["GET"])
+def sharewishlist(userid):
+    user = UserProfile.query.filter_by(userid = userid).first().first_name
+    wishlist = WishListItem.query.filter_by(userid=userid).all()
+    
+    wishes = []
+    
+    for wish in wishlist:
+        wish = wish.__dict__
+        del wish['_sa_instance_state']
+        wishes.append(wish)
+        
+    return render_template('wishlist.html', wishes=wishes, name = user)
+
+@app.route("/send", methods=["POST"])
+@requires_auth
+def send():
+    uid = request.get_json()["uid"]
+    name = request.get_json()["name"]
+    email = request.get_json()["email"]
+    user = UserProfile.query.filter_by(userid = uid).first()
+    msg = "Click the link to view " + user.first_name + "'s WishList.  http://info3180-project2-jhanelle.c9users.io:8080/share/" + uid
+    send_email(name, email, user.first_name, user.email, msg)
+    return jsonify({"success":"True"})
+    
+    
 @login_manager.user_loader
 def load_user(id):
     return UserProfile.query.get(int(id))
@@ -177,7 +249,22 @@ def genId(fname, lname, num):
     nid = "".join(nid)
 
     return nid[:7]
-
+    
+def send_email(to_name, to_addr, from_name, from_addr, msg):
+    subject = "WishList"
+    message = """From: {} <{}> To: {} <{}> Subject: {} {} """
+    message_to_send = message.format(from_name, from_addr, to_name, to_addr, subject, msg)
+    
+    # Credentials (if needed)
+    username = '@gmail.com'
+    password = ''
+    
+    # The actual mail send
+    server = smtplib.SMTP('smtp.gmail.com:587')
+    server.starttls()
+    server.login(username, password)
+    server.sendmail(from_addr, to_addr, message_to_send)
+    server.quit()
 
 if __name__ == '__main__':
     app.run(debug=True,host="0.0.0.0",port="8080")
