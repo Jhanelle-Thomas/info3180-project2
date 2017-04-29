@@ -82,6 +82,34 @@ def register():
 
     return jsonify({"Success":"True"})
 
+### EXTRA API
+@app.route("/api/users/<int:userid>/wishlist/share", methods=["GET", "POST"])
+def share(userid):
+    
+    if request.method == "GET":
+        wishlist = WishListItem.query.filter_by(userid=userid).all()
+        
+        wishes = []
+        
+        for wish in wishlist:
+            wish = wish.__dict__
+            del wish['_sa_instance_state']
+            wishes.append(wish)
+            
+        return jsonify(wishes)
+        
+    elif request.method == "POST":
+        uid = request.get_json()["uid"]
+        name = request.get_json()["name"]
+        email = request.get_json()["email"]
+        user = UserProfile.query.filter_by(userid = uid).first()
+        link = request.url.replace("/send","/share/")
+        msg = "Click the link to view " + user.first_name + "'s WishList. " + link + uid
+        send_email(name, email, user.first_name, user.email, msg)
+        return jsonify({"success":"True"})
+
+###
+
 @app.route("/api/users/<int:userid>/wishlist", methods=["GET","POST"])
 @requires_auth
 def wishlist(userid):
@@ -190,7 +218,6 @@ def sharewishlist(userid):
         wish = wish.__dict__
         del wish['_sa_instance_state']
         wishes.append(wish)
-        
     return render_template('wishlist.html', wishes=wishes, name = user)
 
 @app.route("/send", methods=["POST"])
@@ -200,7 +227,8 @@ def send():
     name = request.get_json()["name"]
     email = request.get_json()["email"]
     user = UserProfile.query.filter_by(userid = uid).first()
-    msg = "Click the link to view " + user.first_name + "'s WishList.  http://info3180-project2-jhanelle.c9users.io:8080/share/" + uid
+    link = request.url.replace("/send","/share/")
+    msg = "Click the link to view " + user.first_name + "'s WishList. " + link + uid
     send_email(name, email, user.first_name, user.email, msg)
     return jsonify({"success":"True"})
     
@@ -256,8 +284,8 @@ def send_email(to_name, to_addr, from_name, from_addr, msg):
     message_to_send = message.format(from_name, from_addr, to_name, to_addr, subject, msg)
     
     # Credentials (if needed)
-    username = '@gmail.com'
-    password = ''
+    username = 'akeem.nicholson13@gmail.com'
+    password = 'alterego9'
     
     # The actual mail send
     server = smtplib.SMTP('smtp.gmail.com:587')
