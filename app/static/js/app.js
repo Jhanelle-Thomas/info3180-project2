@@ -158,8 +158,28 @@ app.controller("shareCtrl", function($scope, $http){
                 alert("There was an error, your wishlist was not shared");
             }
         });
-        
     };
+});
+
+app.controller("viewshareCtrl", function($scope, $http){
+    var i = 0;
+    var htm = "";
+    var uid = document.getElementById("uid").value;
+    var div = document.getElementById("wishes");
+
+    $http.get('/api/users/'+uid+'/wishlist/share').then(function(res){
+        
+        for(i=0; i < res.data.length; i++){
+            htm += "<hr/>";
+            htm += "<p><b>Title: </b>"+res.data[i]["title"]+"</p><br/>";
+            htm += "<img src="+'"'+res.data[i]["thumbnail"]+'"'+"/>";
+            htm += "<p><b>Description: </b>"+res.data[i]["description"]+"</p><br/>";
+            htm += "<p><b>Website URL: </b><a href ='"+res.data[i]["website"]+"'>"+ res.data[i]["website"] + "</a></p><br/>";
+            htm += "<hr/>";
+        }
+        
+        div.innerHTML = htm;
+    });
 });
 
 function giveThumbail(img){

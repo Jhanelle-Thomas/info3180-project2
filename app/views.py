@@ -210,6 +210,7 @@ def logout():
 @app.route("/share/<int:userid>", methods=["GET"])
 def sharewishlist(userid):
     user = UserProfile.query.filter_by(userid = userid).first().first_name
+    """
     wishlist = WishListItem.query.filter_by(userid=userid).all()
     
     wishes = []
@@ -218,7 +219,8 @@ def sharewishlist(userid):
         wish = wish.__dict__
         del wish['_sa_instance_state']
         wishes.append(wish)
-    return render_template('wishlist.html', wishes=wishes, name = user)
+    """
+    return render_template('wishlist.html', name = user, uid = userid)
 
 @app.route("/send", methods=["POST"])
 @requires_auth
@@ -284,8 +286,8 @@ def send_email(to_name, to_addr, from_name, from_addr, msg):
     message_to_send = message.format(from_name, from_addr, to_name, to_addr, subject, msg)
     
     # Credentials (if needed)
-    username = 'akeem.nicholson13@gmail.com'
-    password = 'alterego9'
+    username = 'info3180project3@gmail.com'
+    password = 'info3180'
     
     # The actual mail send
     server = smtplib.SMTP('smtp.gmail.com:587')

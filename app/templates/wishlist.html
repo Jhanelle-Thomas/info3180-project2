@@ -1,16 +1,22 @@
 {% extends "base.html" %}
 
 {% block main %}
-
+<!--
+<h1>{{ name }}'s WishList</h1>
 {% for wish in wishes %}
-    <h1>{{ name }}'s WishList</h1>
     <hr/>
     <p><b>Title: </b> {{ wish.title }}</p><br/>
     <img src="{{ wish.thumbnail }}"/>
     <p><b>Description: </b> {{ wish.description }}</p><br/>
     <p><b>Website URL: </b><a href = "{{ wish.website }}"> {{ wish.website }}</a></p><br/>
 {% endfor %}
-
+-->
+<input type="hidden" id="uid" value="{{ uid }}">
+<h1>{{ name }}'s WishList</h1>
+<div id="wishes" ng-app = "wishListApp" ng-controller="viewshareCtrl">
+        
+</div>
+    
 {% endblock %}
 
 {% block js %} 
